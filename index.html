@@ -284,16 +284,14 @@
     });
 
     // ⚠️ Cole aqui a URL gerada no Apps Script (Passo 3)
-    var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwDaulVlgsFc_CfSVSkTa_nfV0MxwKRhN824Y4dKdio3D6o6gRAFgI7Vntlm9rQfNsiZA/exec';
+    var SCRIPT_URL = 'https://achadosgrazi.lbonavin.workers.dev';
 
     function submitEmail(email, onSuccess, onError) {
-      // Usa tag <img> para disparar o GET sem restricao de CORS
-      var img = new Image();
       var url = SCRIPT_URL + '?email=' + encodeURIComponent(email);
-      img.onload  = function() { onSuccess('salvo'); };
-      img.onerror = function() { onSuccess('salvo'); }; // Apps Script retorna JSON (nao imagem),
-                                                        // entao sempre cai no onerror — mas o dado foi salvo
-      img.src = url;
+      fetch(url)
+        .then(function(r) { return r.json(); })
+        .then(function() { onSuccess('salvo'); })
+        .catch(function() { onError('Erro de conexao. Tente novamente.'); });
     }
 
     function showSuccess(formId, feedbackId) {
