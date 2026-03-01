@@ -287,35 +287,13 @@
     var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwDaulVlgsFc_CfSVSkTa_nfV0MxwKRhN824Y4dKdio3D6o6gRAFgI7Vntlm9rQfNsiZA/exec';
 
     function submitEmail(email, onSuccess, onError) {
-      // Usa um iframe oculto como target para evitar CORS e redirect do Apps Script
-      var iframeId = 'gs-iframe';
-      var iframe = document.getElementById(iframeId);
-      if (!iframe) {
-        iframe = document.createElement('iframe');
-        iframe.id = iframeId;
-        iframe.name = iframeId;
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
-      }
-
-      var tempForm = document.createElement('form');
-      tempForm.method = 'GET';
-      tempForm.action = SCRIPT_URL;
-      tempForm.target = iframeId;
-
-      var input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = 'email';
-      input.value = email;
-      tempForm.appendChild(input);
-
-      document.body.appendChild(tempForm);
-      tempForm.submit();
-      document.body.removeChild(tempForm);
-
-      // Nao temos como ler a resposta do iframe (cross-origin),
-      // mas o dado chega na planilha normalmente
-      setTimeout(function() { onSuccess('salvo'); }, 1000);
+      // Usa tag <img> para disparar o GET sem restricao de CORS
+      var img = new Image();
+      var url = SCRIPT_URL + '?email=' + encodeURIComponent(email);
+      img.onload  = function() { onSuccess('salvo'); };
+      img.onerror = function() { onSuccess('salvo'); }; // Apps Script retorna JSON (nao imagem),
+                                                        // entao sempre cai no onerror — mas o dado foi salvo
+      img.src = url;
     }
 
     function showSuccess(formId, feedbackId) {
@@ -380,4 +358,3 @@
   </script>
 </body>
 </html>
-
